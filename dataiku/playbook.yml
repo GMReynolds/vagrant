@@ -1,16 +1,43 @@
 ---
 - hosts: all
   become: true
+  vars:
+    datadir: /home/data
   
   tasks:
-    - name: Download files
+    - name: Update and upgrade apt packages
+      apt:
+        upgrade: yes
+        update_cache: yes
+
+    - name: Installing Dependicies
+      apt: name={{ item }} state=present
+      with_items:
+        - git
+        - nginx
+        - unzip
+        - zip
+        - default-jre-headless
+        - libgfortran3
+
+    - name: Download Dataiku files
       unarchive:
         src: https://downloads.dataiku.com/public/studio/4.3.3/dataiku-dss-4.3.3.tar.gz
         dest: /home/
         remote_src: yes
+
+    - name: Make data Directory
+      file: 
+        path: "{{ datadir }}" 
+        state: directory
+        recurse: yes
+        mode: 0777
         
     - name: Run Intall script
-      script: /home/dataiku-dss-4.3.3/installer.sh -d DATA_DIR -p 11000
+      command: /home/dataiku-dss-4.3.3/installer.sh -d {{ datadir }} -p 11000
+      become: false
       
     - name: Starting 
-      command: /home/DATA_DIR/bin/dss start
+      command: "{{ datadir }}/bin/dss start"
+      become: false
+ 
