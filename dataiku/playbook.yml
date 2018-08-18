@@ -1,0 +1,16 @@
+---
+- hosts: all
+  become: true
+  
+  tasks:
+    - name: Download files
+      unarchive:
+        src: https://downloads.dataiku.com/public/studio/4.3.3/dataiku-dss-4.3.3.tar.gz
+        dest: /home/
+        remote_src: yes
+        
+    - name: Run Intall script
+      script: /home/dataiku-dss-4.3.3/installer.sh -d DATA_DIR -p 11000
+      
+    - name: Starting 
+      command: /home/DATA_DIR/bin/dss start
